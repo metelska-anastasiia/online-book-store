@@ -4,9 +4,11 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
+import mate.academy.lib.FieldMatch;
 
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
+@FieldMatch(first = "password", second = "repeatPassword", message = "Passwords must match")
 public class UserRegistrationRequest {
     @NotBlank
     @Size(min = 4, max = 50)

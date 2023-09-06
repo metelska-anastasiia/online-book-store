@@ -9,6 +9,7 @@ import mate.academy.dto.user.UserResponseDto;
 import mate.academy.exception.RegistrationException;
 import mate.academy.security.AuthenticationService;
 import mate.academy.service.UserService;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -27,7 +28,7 @@ public class AuthenticationController {
         return userService.register(request);
     }
 
-    @PostMapping("/login")
+    @GetMapping("/login")
     public UserLoginResponseDto login(@RequestBody UserLoginRequestDto requestDto) {
         return authenticationService.authenticate(requestDto);
     }
