@@ -62,4 +62,12 @@ public class BookController {
     public List<BookDto> search(BookSearchParameters searchParameters) {
         return bookService.search(searchParameters);
     }
+
+    /*    @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @Operation(summary = "Update book by id", description = "Update book by id")
+    public BookDto updateBook(@PathVariable Long id,
+    @RequestBody @Valid CreateBookRequestDto updateBook) {
+        BookDto bookFromDb = bookService.findById(id);
+    }*/
 }
