@@ -1,0 +1,29 @@
+databaseChangeLog:
+  - changeSet:
+      id: insert-users
+      author: AnastasiiaMetelska
+      changes:
+        - insert:
+            tableName: users
+            columns:
+              - column: { name: email, value: 'bob@example.com' }
+              - column: { name: password, value: '$2a$10$l7wlcrpU7ncwbVK/qMUafe7gSFrzpXz3xj4Y3tOJo7BgQZT4rxMaq'} #12345678
+              - column: { name: first_name, value: 'Bob' }
+              - column: { name: last_name, value: 'Robinson' }
+              - column: { name: shipping_address, value: '123 Main St' }
+        - insert:
+            tableName: users
+            columns:
+              - column: { name: email, value: 'alice@example.com' }
+              - column: { name: password, value: '$2a$10$l7wlcrpU7ncwbVK/qMUafe7gSFrzpXz3xj4Y3tOJo7BgQZT4rxMaq'} #12345678
+              - column: { name: first_name, value: 'Alice' }
+              - column: { name: last_name, value: 'Black' }
+              - column: { name: shipping_address, value: '321 Mayami St.' }
+        - insert:
+            tableName: users
+            columns:
+              - column: { name: email, value: 'john@example.com' }
+              - column: { name: password, value: '$2a$10$l7wlcrpU7ncwbVK/qMUafe7gSFrzpXz3xj4Y3tOJo7BgQZT4rxMaq'} #12345678
+              - column: { name: first_name, value: 'John' }
+              - column: { name: last_name, value: 'Doe' }
+              - column: { name: shipping_address, value: '15 London St.' }

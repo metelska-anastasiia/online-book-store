@@ -3,9 +3,9 @@ package mate.academy.service.impl;
 import java.util.List;
 import java.util.Random;
 import lombok.RequiredArgsConstructor;
-import mate.academy.dto.BookDto;
-import mate.academy.dto.BookSearchParameters;
-import mate.academy.dto.CreateBookRequestDto;
+import mate.academy.dto.book.BookDto;
+import mate.academy.dto.book.BookSearchParameters;
+import mate.academy.dto.book.CreateBookRequestDto;
 import mate.academy.exception.EntityNotFoundException;
 import mate.academy.mapper.BookMapper;
 import mate.academy.model.Book;
@@ -53,5 +53,18 @@ public class BookServiceImpl implements BookService {
         Specification<Book> spec = bookSpecificationBuilder.build(searchParameters);
         return bookRepository.findAll(spec).stream()
                 .map(bookMapper::toDto).toList();
+    }
+
+    @Override
+    public BookDto update(Long id, CreateBookRequestDto requestDto) {
+        Book existingBook = bookRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Can't find book by id " + id));
+        existingBook.setTitle(requestDto.getTitle());
+        existingBook.setAuthor(requestDto.getAuthor());
+        existingBook.setPrice(requestDto.getPrice());
+        existingBook.setDescription(requestDto.getDescription());
+        existingBook.setCoverImage(existingBook.getCoverImage());
+        Book updatedBookInDb = bookRepository.save(existingBook);
+        return bookMapper.toDto(updatedBookInDb);
     }
 }

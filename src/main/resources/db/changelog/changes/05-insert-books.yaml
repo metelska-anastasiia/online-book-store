@@ -1,0 +1,32 @@
+databaseChangeLog:
+  - changeSet:
+      id: insert-books
+      author: AnastasiiaMetelska
+      changes:
+        - insert:
+            tableName: books
+            columns:
+              - column: {name: title, value: "Lisova Mavka"}
+              - column: {name: author, value: "Lesya Ukrainka"}
+              - column: {name: isbn, value: "12345678908712764"}
+              - column: {name: price, valueNumeric: 599.50}
+              - column: {name: description, value: "classic ukrainian literature"}
+              - column: {name: cover_image, value: "imgMavka.jpg"}
+        - insert:
+            tableName: books
+            columns:
+              - column: {name: title, value: "Kobzar"}
+              - column: {name: author, value: "Taras Shevchenko"}
+              - column: {name: isbn, value: "908541358935877"}
+              - column: {name: price, valueNumeric: 649}
+              - column: {name: description, value: "classic ukrainian literature"}
+              - column: {name: cover_image, value: "kobzar.jpg"}
+        - insert:
+            tableName: books
+            columns:
+              - column: {name: title, value: "Zapovit"}
+              - column: {name: author, value: "Taras Shevchenko"}
+              - column: {name: isbn, value: "547674568746909897765"}
+              - column: {name: price, valueNumeric: 320.70}
+              - column: {name: description, value: "classic ukrainian literature"}
+              - column: {name: cover_image, value: "zapovitShevchenko.jpg"}
