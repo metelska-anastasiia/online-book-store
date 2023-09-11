@@ -1,0 +1,48 @@
+databaseChangeLog:
+  - changeSet:
+      id: insert-books
+      author: AnastasiiaMetelska
+      changes:
+        - insert:
+            tableName: books
+            columns:
+              - column: {name: title, value: "Positioning: The Battle for Your Mind"}
+              - column: {name: author, value: "Jack Trout"}
+              - column: {name: isbn, value: "3245345234523453245"}
+              - column: {name: price, valueNumeric: 800}
+              - column: {name: description,
+                         value: "The first book to deal with the problems of communicating to a skeptical, 
+                         media-blitzed public"}
+              - column: {name: cover_image, value: "Positioning.jpg"}
+        - insert:
+            tableName: books
+            columns:
+              - column: {name: title, value: "Surrounded by Idiots: The Four Types of Human Behaviour"}
+              - column: {name: author, value: "Thomas Erikson"}
+              - column: {name: isbn, value: "76587324545365823469"}
+              - column: {name: price, valueNumeric: 780}
+              - column: {name: description, value: "Erikson will help you understand yourself better"}
+              - column: {name: cover_image, value: "Erikson.jpg"}
+        - insert:
+            tableName: books
+            columns:
+              - column: {name: title, value: "The Lion Inside"}
+              - column: {name: author, value: "Rachel Bright"}
+              - column: {name: isbn, value: "45768237463231354678"}
+              - column: {name: price, valueNumeric: 250}
+              - column: {name: description,
+                         value: "A bestselling story about confidence, self-esteem, 
+                         and a shy little mouse who sets out on a journey to find his roar."}
+              - column: {name: cover_image, value: "lion.jpg"}
+        - insert:
+            tableName: books
+            columns:
+              - column: {name: title, value: "Brief Answers to the Big Questions"}
+              - column: {name: author, value: "Stephen Hawking"}
+              - column: {name: isbn, value: "3524560990956716"}
+              - column: {name: price, valueNumeric: 1999}
+              - column: {name: description,
+                         value: "The world-famous cosmologist and #1 bestselling author of A Brief History 
+                         of Time leaves us with his final thoughts on the universe's 
+                         biggest questions in this brilliant posthumous work."}
+              - column: {name: cover_image, value: "answers.jpg"}
