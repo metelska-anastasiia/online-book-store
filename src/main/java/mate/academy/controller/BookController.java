@@ -8,7 +8,6 @@ import lombok.RequiredArgsConstructor;
 import mate.academy.dto.book.BookDto;
 import mate.academy.dto.book.BookSearchParameters;
 import mate.academy.dto.book.CreateBookRequestDto;
-import mate.academy.mapper.BookMapper;
 import mate.academy.service.BookService;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -29,7 +28,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping(value = "/api/books")
 public class BookController {
     private final BookService bookService;
-    private final BookMapper bookMapper;
 
     @GetMapping
     @Operation(summary = "Get all books", description = "Get all books")

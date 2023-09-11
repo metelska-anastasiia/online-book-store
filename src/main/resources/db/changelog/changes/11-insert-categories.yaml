@@ -1,0 +1,41 @@
+databaseChangeLog:
+  - changeSet:
+      id: insert-categories
+      author: AnastasiiaMetelska
+      changes:
+        - insert:
+            tableName: categories
+            columns:
+              - column: {name: name,
+                         value: "business literature"}
+              - column: {name: description,
+                         value: "literature about business, will help you to improve your management skills"}
+        - insert:
+            tableName: categories
+            columns:
+              - column: { name: name,
+                          value: "psychology literature" }
+              - column: { name: description,
+                          value: "literature about your brain and behaviour, 
+                          will help you to improve your soft skills" }
+        - insert:
+            tableName: categories
+            columns:
+              - column: { name: name,
+                          value: "literature for kids" }
+              - column: { name: description,
+                          value: "simple books to read with your children" }
+        - insert:
+            tableName: categories
+            columns:
+              - column: { name: name,
+                          value: "fiction" }
+              - column: { name: description,
+                          value: "interesting books for evening reading" }
+        - insert:
+            tableName: categories
+            columns:
+              - column: { name: name,
+                          value: "science" }
+              - column: { name: description,
+                          value: "this category made for those people who wants to know more" }
