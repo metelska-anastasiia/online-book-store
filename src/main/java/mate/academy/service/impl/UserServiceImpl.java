@@ -7,6 +7,7 @@ import mate.academy.dto.user.UserResponseDto;
 import mate.academy.exception.EntityNotFoundException;
 import mate.academy.exception.RegistrationException;
 import mate.academy.mapper.UserMapper;
+import mate.academy.model.Role;
 import mate.academy.model.User;
 import mate.academy.repository.role.RoleRepository;
 import mate.academy.repository.user.UserRepository;
@@ -17,7 +18,6 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
-    private static final Long USER_ROLE_ID = 2L;
     private final UserRepository userRepository;
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
@@ -31,9 +31,9 @@ public class UserServiceImpl implements UserService {
         User user = new User();
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setEmail(request.getEmail());
-        user.setRoles(Set.of(roleRepository.findById(USER_ROLE_ID)
-                .orElseThrow(() -> new EntityNotFoundException("Can't find role by id"
-                        + USER_ROLE_ID))));
+        user.setRoles(Set.of(roleRepository.findByRoleName(Role.RoleName.USER)
+                .orElseThrow(() -> new EntityNotFoundException("Can't find role by role name"
+                        + Role.RoleName.USER.name()))));
         user.setFirstName(request.getFirstName());
         user.setLastName(request.getLastName());
         if (request.getShippingAddress() != null) {
