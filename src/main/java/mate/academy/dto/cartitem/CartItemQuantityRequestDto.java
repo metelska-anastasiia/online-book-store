@@ -1,4 +1,4 @@
-package mate.academy.dto.item;
+package mate.academy.dto.cartitem;
 
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
