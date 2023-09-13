@@ -2,7 +2,6 @@ package mate.academy.service.impl;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -128,7 +127,6 @@ public class OrderServiceImpl implements OrderService {
         order.setOrderDate(LocalDateTime.now());
         order.setStatus(Order.Status.NEW);
         order.setTotal(BigDecimal.valueOf(total));
-        order.setOrderItems(new HashSet<>());
         return orderRepository.save(order);
     }
 }
