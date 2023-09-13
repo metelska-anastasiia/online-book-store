@@ -43,7 +43,8 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
         CartItem cartItemToUpdate;
         if (existingCartItem.isPresent()) {
             cartItemToUpdate = existingCartItem.get();
-            cartItemToUpdate.setQuantity(cartItemRequestDto.getQuantity() + cartItemToUpdate.getQuantity());
+            cartItemToUpdate.setQuantity(cartItemRequestDto.getQuantity()
+                    + cartItemToUpdate.getQuantity());
         } else {
             cartItemToUpdate = createNewCartItem(cartItemRequestDto, shoppingCart);
         }
@@ -87,7 +88,8 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
                 () -> new EntityNotFoundException("Can not find user by email" + email));
     }
 
-    private CartItem createNewCartItem(CartItemRequestDto cartItemRequestDto, ShoppingCart shoppingCart) {
+    private CartItem createNewCartItem(CartItemRequestDto cartItemRequestDto,
+                                       ShoppingCart shoppingCart) {
         Book bookFromDb = bookRepository
                 .findById(cartItemRequestDto.getBookId())
                 .orElseThrow(() -> new EntityNotFoundException(
