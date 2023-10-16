@@ -43,19 +43,10 @@ public class CustomAuthenticationFailureHandler implements AuthenticationFailure
                          HttpServletResponse response,
                          AuthenticationException authException)
             throws IOException {
-        // Встановлюємо код помилки 401 (UNAUTHORIZED)
-        response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-
-        // Встановлюємо тип відповіді на JSON
+        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         response.setContentType("application/json;charset=UTF-8");
-
-        // Отримуємо повідомлення про помилку
         String errorMessage = "Authentication failed: " + authException.getMessage();
-
-        // Створюємо JSON-об'єкт з повідомленням про помилку
         String jsonResponse = "{\"error\": \"" + errorMessage + "\"}";
-
-        // Відправляємо JSON-відповідь
         response.getWriter().write(jsonResponse);
     }
 }
