@@ -32,7 +32,7 @@ public class CategoryController {
     private final BookService bookService;
 
     @PostMapping
-    @ResponseStatus(HttpStatus.OK)
+    @ResponseStatus(HttpStatus.CREATED)
     @Operation(summary = "Create a new category", description = "Create a new category")
     @PreAuthorize("hasAuthority('ADMIN')")
     public CategoryResponseDto createCategory(@RequestBody @Valid CategoryDto request) {
@@ -61,7 +61,7 @@ public class CategoryController {
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAuthority('ADMIN')")
-    @ResponseStatus(HttpStatus.OK)
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     @Operation(summary = "Delete category by id", description = "Delete category by id")
     public void deleteCategory(@PathVariable Long id) {
         categoryService.deleteById(id);

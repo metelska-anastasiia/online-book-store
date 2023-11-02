@@ -15,6 +15,7 @@ import mate.academy.service.BookService;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @RequiredArgsConstructor
 @Service
@@ -37,6 +38,7 @@ public class BookServiceImpl implements BookService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public BookDto findById(Long id) {
         return bookMapper.toDto(bookRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Can't find book by id " + id)));
@@ -48,6 +50,7 @@ public class BookServiceImpl implements BookService {
     }
 
     @Override
+    @Transactional
     public List<BookDto> search(BookSearchParameters searchParameters) {
         Specification<Book> spec = bookSpecificationBuilder.build(searchParameters);
         return bookRepository.findAll(spec).stream()
@@ -55,6 +58,7 @@ public class BookServiceImpl implements BookService {
     }
 
     @Override
+    @Transactional
     public BookDto update(Long id, CreateBookRequestDto requestDto) {
         Book existingBook = bookRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Can't find book by id " + id));

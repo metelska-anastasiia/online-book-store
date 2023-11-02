@@ -1,9 +1,10 @@
-package mate.academy.repository.category;
+package mate.academy.repository;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
 import mate.academy.model.Category;
+import mate.academy.repository.category.CategoryRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

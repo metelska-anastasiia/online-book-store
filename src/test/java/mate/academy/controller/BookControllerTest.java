@@ -7,6 +7,7 @@ import static org.springframework.security.test.web.servlet.setup.SecurityMockMv
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -35,7 +36,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.jdbc.datasource.init.ScriptUtils;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -49,7 +49,6 @@ class BookControllerTest {
     private static final Long VALID_ID = 1L;
     private static final Long INVALID_ID = 100000L;
     private static MockMvc mockMvc;
-    private CreateBookRequestDto createBookRequestDto1;
     @Autowired
     private ObjectMapper objectMapper;
     @Autowired
@@ -69,20 +68,12 @@ class BookControllerTest {
 
     @BeforeEach
     void setUp(@Autowired DataSource dataSource) {
-        createBookRequestDto1 = new CreateBookRequestDto()
-                .setTitle("Create Method")
-                .setAuthor("Author 1")
-                .setIsbn("12345")
-                .setPrice(BigDecimal.valueOf(200))
-                .setDescription("New book to test")
-                .setCoverImage("image.jpg");
         setupDatabase(dataSource);
     }
 
     @AfterEach
     void afterEach(@Autowired DataSource dataSource) {
         teardown(dataSource);
-        createBookRequestDto1 = null;
     }
 
     @SneakyThrows
@@ -110,19 +101,24 @@ class BookControllerTest {
     @Test
     @DisplayName("Create a new Book")
     @WithMockUser(username = "admin", password = "test", authorities = {"ADMIN", "USER"})
-    @Sql(scripts = "classpath:database/controller/book/remove-from-books.sql",
-            executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
     void createBook_validCreateBookRequestDto_Success() throws Exception {
         //Given
+        CreateBookRequestDto createBookRequestDto = new CreateBookRequestDto()
+                .setTitle("Create Method")
+                .setAuthor("Author 1")
+                .setIsbn("12345")
+                .setPrice(BigDecimal.valueOf(200))
+                .setDescription("New book to test")
+                .setCoverImage("image.jpg");
         BookDto expected = new BookDto()
-                .setAuthor(createBookRequestDto1.getAuthor())
-                .setTitle(createBookRequestDto1.getTitle())
-                .setPrice(createBookRequestDto1.getPrice())
-                .setDescription(createBookRequestDto1.getDescription())
-                .setCoverImage(createBookRequestDto1.getCoverImage())
-                .setIsbn(createBookRequestDto1.getIsbn());
+                .setAuthor(createBookRequestDto.getAuthor())
+                .setTitle(createBookRequestDto.getTitle())
+                .setPrice(createBookRequestDto.getPrice())
+                .setDescription(createBookRequestDto.getDescription())
+                .setCoverImage(createBookRequestDto.getCoverImage())
+                .setIsbn(createBookRequestDto.getIsbn());
 
-        String jsonRequest = objectMapper.writeValueAsString(createBookRequestDto1);
+        String jsonRequest = objectMapper.writeValueAsString(createBookRequestDto);
 
         //When
         MvcResult mvcResult = mockMvc.perform(
@@ -192,7 +188,7 @@ class BookControllerTest {
         //Then
         List<BookDto> actual = objectMapper.readValue(
                 jsonResponse,
-                new TypeReference<List<BookDto>>() {}
+                new TypeReference<>() {}
         );
         assertNotNull(actual);
         assertEquals(expected.size(), actual.size());
@@ -251,28 +247,65 @@ class BookControllerTest {
     @DisplayName("Verify search() with valid parameters will return book")
     @WithMockUser(username = "user", password = "test", authorities = {"ADMIN", "USER"})
     void search_validSearchParameters_Success() throws Exception {
-        BookDto expected = new BookDto()
-                .setId(1L)
-                .setTitle("Book 1")
-                .setAuthor("Author 1")
-                .setIsbn("ISBN-123456")
-                .setPrice(BigDecimal.valueOf(100))
-                .setDescription("Description for Book 1")
-                .setCoverImage("image1.jpg")
-                .setCategoryIds(Set.of());
+        List<BookDto> expected = new ArrayList<>();
+        expected.add(new BookDto()
+                 .setId(1L)
+                 .setTitle("Book 1")
+                 .setAuthor("Author 1")
+                 .setIsbn("ISBN-123456")
+                 .setPrice(BigDecimal.valueOf(100))
+                 .setDescription("Description for Book 1")
+                 .setCoverImage("image1.jpg")
+                 .setCategoryIds(Set.of()));
 
         MvcResult mvcResult = mockMvc.perform(
-                        get("/api/books/search?title=Book 1&author=Author 1")
+                        get("/api/books/search?titles=Book 1&authors=Author 1")
                                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andReturn();
         String jsonResponse = mvcResult.getResponse().getContentAsString();
 
-        BookDto actual = objectMapper.readValue(jsonResponse, BookDto.class);
+        List<BookDto> actual = objectMapper.readValue(
+                jsonResponse,
+                new TypeReference<>() {}
+        );
         assertEquals(expected, actual);
     }
 
     @Test
-    void updateBook_WithValidIdAndCreateBookRequestDto_Success() {
+    @DisplayName("Update book with valid parameters")
+    @WithMockUser(username = "user", password = "test", authorities = {"ADMIN", "USER"})
+    void updateBook_WithValidIdAndCreateBookRequestDto_Success() throws Exception {
+        CreateBookRequestDto updateBookRequestDto = new CreateBookRequestDto()
+                .setTitle("Updated Title")
+                .setAuthor("Updated Author")
+                .setIsbn("12345")
+                .setPrice(BigDecimal.valueOf(250))
+                .setDescription("Updated description")
+                .setCoverImage("updated_image.jpg");
+
+        BookDto expected = new BookDto()
+                .setTitle(updateBookRequestDto.getTitle())
+                .setAuthor(updateBookRequestDto.getAuthor())
+                .setIsbn(updateBookRequestDto.getIsbn())
+                .setPrice(updateBookRequestDto.getPrice())
+                .setDescription(updateBookRequestDto.getDescription())
+                .setCoverImage(updateBookRequestDto.getCoverImage())
+                .setId(VALID_ID);
+
+        String jsonRequest = objectMapper.writeValueAsString(updateBookRequestDto);
+
+        MvcResult mvcResult = mockMvc.perform(
+                        put("/api/books/{id}", VALID_ID)
+                                .content(jsonRequest)
+                                .contentType(MediaType.APPLICATION_JSON)
+                )
+                .andExpect(status().isOk())
+                .andReturn();
+
+        String jsonResponse = mvcResult.getResponse().getContentAsString();
+        BookDto actual = objectMapper.readValue(jsonResponse, BookDto.class);
+        assertNotNull(actual);
+        EqualsBuilder.reflectionEquals(expected, actual);
     }
 }

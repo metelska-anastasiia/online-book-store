@@ -1,10 +1,11 @@
-package mate.academy.repository.book;
+package mate.academy.repository;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
 import java.util.List;
 import mate.academy.model.Book;
+import mate.academy.repository.book.BookRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
