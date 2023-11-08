@@ -238,11 +238,11 @@ class CategoryControllerTest {
     @DisplayName("Search books by category id")
     @WithMockUser(username = "user", password = "test", authorities = {"USER"})
     @Sql(scripts = {
-            "classpath:database/controller/book/add-books-to-books-table.sql",
+            "classpath:database/controller/category/add-books-to-books-table.sql",
             "classpath:database/controller/category/add-category-to-book.sql",
     }, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
     @Sql(scripts = {
-            "classpath:database/controller/book/remove-from-books.sql",
+            "classpath:database/controller/category/remove-from-books.sql",
             "classpath:database/controller/category/remove-from-book_category.sql",
     }, executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
     void getBooksByCategoryId_validId_success() throws Exception {
@@ -271,6 +271,7 @@ class CategoryControllerTest {
                 .setPrice(BigDecimal.valueOf(250))
                 .setDescription("Description for Book 3")
                 .setCoverImage("image3.jpg"));
+
         MvcResult mvcResult = mockMvc.perform(get("/api/categories/{id}/books", VALID_ID)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())

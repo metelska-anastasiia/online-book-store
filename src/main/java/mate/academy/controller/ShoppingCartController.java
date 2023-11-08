@@ -31,7 +31,7 @@ public class ShoppingCartController {
     private final CartItemRepository cartItemRepository;
 
     @PostMapping
-    @ResponseStatus(HttpStatus.OK)
+    @ResponseStatus(HttpStatus.CREATED)
     @Operation(summary = "Add new book to cart",
             description = "Before adding new book we check if this book is already in cart "
                     + "and than or change qty or add new cartItem")
@@ -51,11 +51,12 @@ public class ShoppingCartController {
     @PutMapping("/books/{id}")
     @PreAuthorize("hasAuthority('USER')")
     @ResponseStatus(HttpStatus.OK)
-    @Operation(summary = "Update book qty in cart", description = "Update book qty in cart")
+    @Operation(summary = "Update book qty in cart",
+            description = "You just set new qty of book in your shopping cart")
     public void updateCartItemByBookId(Authentication authentication, @PathVariable Long id,
                                        @RequestBody @Valid
-                                       CartItemQuantityRequestDto qtyToSubtract) {
-        shoppingCartService.updateBookQuantity(authentication, id, qtyToSubtract);
+                                       CartItemQuantityRequestDto qty) {
+        shoppingCartService.updateBookQuantity(authentication, id, qty);
     }
 
     @DeleteMapping("/cart-items/{id}")

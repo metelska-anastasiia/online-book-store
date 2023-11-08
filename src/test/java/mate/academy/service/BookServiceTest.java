@@ -57,23 +57,23 @@ class BookServiceTest {
 
     @BeforeEach
     public void setUp() {
-        book1 = new Book();
-        book1.setId(BOOK_ID);
-        book1.setAuthor("Author 1");
-        book1.setTitle("Test Book");
-        book1.setPrice(BigDecimal.valueOf(200));
-        book1.setDescription("New book1 to test");
-        book1.setCoverImage("image.jpg");
-        book1.setIsbn("12345");
+        book1 = new Book()
+                .setId(BOOK_ID)
+                .setAuthor("Author 1")
+                .setTitle("Test Book")
+                .setPrice(BigDecimal.valueOf(200))
+                .setDescription("New book1 to test")
+                .setCoverImage("image.jpg")
+                .setIsbn("12345");
 
-        book2 = new Book();
-        book2.setId(2L);
-        book2.setAuthor("Author 2");
-        book2.setTitle("Test Book 2");
-        book2.setPrice(BigDecimal.valueOf(340));
-        book2.setDescription("New book2 to test");
-        book2.setCoverImage("image.jpg");
-        book2.setIsbn("12345678");
+        book2 = new Book()
+                .setId(2L)
+                .setAuthor("Author 2")
+                .setTitle("Test Book 2")
+                .setPrice(BigDecimal.valueOf(340))
+                .setDescription("New book2 to test")
+                .setCoverImage("image.jpg")
+                .setIsbn("12345678");
     }
 
     @AfterEach

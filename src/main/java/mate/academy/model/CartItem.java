@@ -12,6 +12,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
+import lombok.experimental.Accessors;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 
@@ -20,6 +21,7 @@ import org.hibernate.annotations.Where;
 @Table(name = "cart_items")
 @Where(clause = "is_deleted=FALSE")
 @SQLDelete(sql = "UPDATE cart_items SET is_deleted=TRUE WHERE id=?")
+@Accessors(chain = true)
 public class CartItem {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

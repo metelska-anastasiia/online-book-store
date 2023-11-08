@@ -62,7 +62,7 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
     @Override
     public void updateBookQuantity(Authentication authentication,
                                    Long cartItemId,
-                                   CartItemQuantityRequestDto qtyToSubtract) {
+                                   CartItemQuantityRequestDto qtyRequestDto) {
         User user = getUser(authentication);
         ShoppingCart shoppingCart = shoppingCartRepository.findShoppingCartByUserId(user.getId())
                 .orElseThrow(() -> new EntityNotFoundException("Can't find shopping cart by "
@@ -72,7 +72,7 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
                         shoppingCart.getId())
                 .orElseThrow(() -> new EntityNotFoundException("Can't find cart item "
                         + "by cart item id " + cartItemId));
-        cartItem.setQuantity(cartItem.getQuantity() - qtyToSubtract.getQuantity());
+        cartItem.setQuantity(qtyRequestDto.getQuantity());
         cartItemRepository.save(cartItem);
     }
 
