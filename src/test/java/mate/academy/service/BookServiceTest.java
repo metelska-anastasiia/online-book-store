@@ -95,14 +95,7 @@ class BookServiceTest {
                 .setCoverImage("image.jpg")
                 .setCategoryIds(Set.of(1L));
 
-        BookDto expected = new BookDto()
-                .setId(1L)
-                .setAuthor("Author 1")
-                .setTitle("Test Book")
-                .setPrice(BigDecimal.valueOf(200))
-                .setDescription("New book to test")
-                .setCoverImage("image.jpg")
-                .setIsbn("12345");
+        BookDto expected = prepareBookDto();
 
         when(bookMapper.toModel(createBookRequestDto)).thenReturn(book1);
         when(bookRepository.save(book1)).thenReturn(book1);
@@ -121,14 +114,7 @@ class BookServiceTest {
         //Given
         Pageable pageable = PageRequest.of(0, 10);
 
-        BookDto bookDto = new BookDto()
-                .setId(1L)
-                .setAuthor("Author 1")
-                .setTitle("Test Book")
-                .setPrice(BigDecimal.valueOf(200))
-                .setDescription("New book to test")
-                .setCoverImage("image.jpg")
-                .setIsbn("12345");
+        BookDto bookDto = prepareBookDto();
         List<BookDto> expected = new ArrayList<>();
         expected.add(bookDto);
 
@@ -153,13 +139,7 @@ class BookServiceTest {
     @DisplayName("Verify findById() displays right book")
     void findById_ValidBookId_ShouldFindBook() {
         //Given
-        BookDto expected = new BookDto().setId(1L)
-                .setAuthor("Author 1")
-                .setTitle("Test Book")
-                .setPrice(BigDecimal.valueOf(200))
-                .setDescription("New book to test")
-                .setCoverImage("image.jpg")
-                .setIsbn("12345");
+        BookDto expected = prepareBookDto();
 
         when(bookRepository.findById(BOOK_ID)).thenReturn(Optional.of(book1));
         when(bookMapper.toDto(book1)).thenReturn(expected);
@@ -304,5 +284,16 @@ class BookServiceTest {
 
         //Then
         assertEquals(expected, actual);
+    }
+
+    private BookDto prepareBookDto() {
+        return new BookDto()
+                .setId(1L)
+                .setAuthor("Author 1")
+                .setTitle("Test Book")
+                .setPrice(BigDecimal.valueOf(200))
+                .setDescription("New book to test")
+                .setCoverImage("image.jpg")
+                .setIsbn("12345");
     }
 }

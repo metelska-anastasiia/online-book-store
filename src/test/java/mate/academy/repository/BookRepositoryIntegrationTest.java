@@ -29,7 +29,7 @@ import org.springframework.test.context.jdbc.Sql;
 
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-class BookRepositoryTest {
+class BookRepositoryIntegrationTest {
     private static final Long BOOK_ID = 1L;
     private static final Long CATEGORY_ID = 1L;
     private static final Long EXPECTED_LIST_SIZE = 3L;
@@ -92,19 +92,7 @@ class BookRepositoryTest {
             "classpath:database/repository/book/after/remove-from-categories.sql"
     }, executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
     void findById_validId_ShouldReturnBook() {
-        Book expected = new Book()
-                .setId(1L)
-                .setTitle("Book 1")
-                .setAuthor("Author 1")
-                .setIsbn("ISBN-123456")
-                .setPrice(BigDecimal.valueOf(100))
-                .setDescription("Description for Book 1")
-                .setCoverImage("image1.jpg")
-                .setCategories(Set.of(new Category()
-                        .setId(1L)
-                        .setName("Poetry")
-                        .setDescription("Poems that you will love"))
-        );
+        Book expected = prepareBookWithCategories();
         Optional<Book> actual = bookRepository.findById(BOOK_ID);
         assertFalse(actual.isEmpty());
         assertEquals(expected, actual.get());
@@ -137,23 +125,25 @@ class BookRepositoryTest {
         when(bookSpecificationBuilder.build(bookSearchParameters)).thenReturn(spec);
 
         List<Book> expected = new ArrayList<>();
-        expected.add(
-                new Book().setId(1L)
-                        .setTitle("Book 1")
-                        .setAuthor("Author 1")
-                        .setIsbn("ISBN-123456")
-                        .setPrice(BigDecimal.valueOf(100))
-                        .setDescription("Description for Book 1")
-                        .setCoverImage("image1.jpg")
-                        .setCategories(Set.of(new Category()
-                                .setId(1L)
-                                .setName("Poetry")
-                                .setDescription("Poems that you will love"))
-                        )
-        );
+        expected.add(prepareBookWithCategories());
 
         List<Book> actual = bookRepository.findAll(spec);
 
         assertEquals(expected, actual);
+    }
+
+    private Book prepareBookWithCategories() {
+        return new Book().setId(1L)
+                .setTitle("Book 1")
+                .setAuthor("Author 1")
+                .setIsbn("ISBN-123456")
+                .setPrice(BigDecimal.valueOf(100))
+                .setDescription("Description for Book 1")
+                .setCoverImage("image1.jpg")
+                .setCategories(Set.of(new Category()
+                        .setId(1L)
+                        .setName("Poetry")
+                        .setDescription("Poems that you will love"))
+                );
     }
 }

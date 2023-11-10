@@ -22,7 +22,7 @@ import org.springframework.test.context.jdbc.Sql;
 
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-class OrderRepositoryTest {
+class OrderRepositoryIntegrationTest {
     private static final int PAGE_NUMBER = 0;
     private static final int PAGE_SIZE = 3;
     private static final Long USER_ID = 1L;
@@ -57,19 +57,8 @@ class OrderRepositoryTest {
     @Sql(scripts = "classpath:database/repository/order/after/remove-from-tables.sql",
             executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
     void findByUserIdAndId_validIds_Success() {
-        User user = new User()
-                .setId(USER_ID)
-                .setEmail("john@test.com")
-                .setFirstName("John")
-                .setLastName("Doe")
-                .setPassword("test");
-        Order expected = new Order()
-                .setId(ORDER_ID)
-                .setUser(user)
-                .setStatus(Order.Status.CANCELED)
-                .setTotal(BigDecimal.valueOf(450))
-                .setOrderDate(LocalDateTime.of(2023, 9, 12, 00, 31, 58))
-                .setShippingAddress("Kyiv, NewPost110");
+        User user = prepareUser();
+        Order expected = prepareOrder().setUser(user);
 
         Optional<Order> actual = orderRepository.findByUserIdAndId(USER_ID, ORDER_ID);
 
@@ -87,22 +76,28 @@ class OrderRepositoryTest {
     @Sql(scripts = "classpath:database/repository/order/after/remove-from-tables.sql",
             executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
     void findById_validId_Success() {
-        User user = new User()
+        User user = prepareUser();
+        Order expected = prepareOrder().setUser(user);
+        Optional<Order> actual = orderRepository.findById(ORDER_ID);
+        assertFalse(actual.isEmpty());
+        assertEquals(expected, actual.get());
+    }
+
+    private User prepareUser() {
+        return new User()
                 .setId(USER_ID)
                 .setEmail("john@test.com")
                 .setFirstName("John")
                 .setLastName("Doe")
                 .setPassword("test");
-        Order expected = new Order()
+    }
+
+    private Order prepareOrder() {
+        return new Order()
                 .setId(ORDER_ID)
-                .setUser(user)
                 .setStatus(Order.Status.CANCELED)
                 .setTotal(BigDecimal.valueOf(450))
                 .setOrderDate(LocalDateTime.of(2023, 9, 12, 00, 31, 58))
                 .setShippingAddress("Kyiv, NewPost110");
-
-        Optional<Order> actual = orderRepository.findById(ORDER_ID);
-        assertFalse(actual.isEmpty());
-        assertEquals(expected, actual.get());
     }
 }

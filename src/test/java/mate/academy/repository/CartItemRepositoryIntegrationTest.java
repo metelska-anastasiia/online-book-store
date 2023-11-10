@@ -20,7 +20,7 @@ import org.springframework.test.context.jdbc.Sql;
 
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-class CartItemRepositoryTest {
+class CartItemRepositoryIntegrationTest {
     private static final Long CART_ITEM_ID = 1L;
     private static final Long SHOPPING_CART_ID = 1L;
     private static final Long BOOK_ID = 1L;

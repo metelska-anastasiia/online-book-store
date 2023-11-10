@@ -35,7 +35,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-class ShoppingCartControllerTest {
+class ShoppingCartControllerIntegrationTest {
     private static final Long BOOK_ID = 1L;
     private static final int EXPECTED_QTY = 2;
 

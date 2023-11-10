@@ -19,7 +19,7 @@ import org.springframework.test.context.jdbc.Sql;
 
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-class ShoppingCartRepositoryTest {
+class ShoppingCartRepositoryIntegrationTest {
     private static final Long USER_ID = 1L;
     private static final Long BOOK_ID = 1L;
     @Autowired

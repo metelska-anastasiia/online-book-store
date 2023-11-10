@@ -18,8 +18,6 @@ import mate.academy.mapper.CategoryMapper;
 import mate.academy.model.Category;
 import mate.academy.repository.category.CategoryRepository;
 import mate.academy.service.impl.CategoryServiceImpl;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -41,20 +39,6 @@ class CategoryServiceTest {
     private CategoryMapper categoryMapper;
     @InjectMocks
     private CategoryServiceImpl categoryService;
-    private Category category;
-
-    @BeforeEach
-    public void setUp() {
-        category = new Category();
-        category.setId(CATEGORY_ID);
-        category.setName("Category 1");
-        category.setDescription("Test");
-    }
-
-    @AfterEach
-    public void cleanUp() {
-        category = null;
-    }
 
     @Test
     @DisplayName("Verify findAll() returns all not-deleted categories in DB")
@@ -62,11 +46,10 @@ class CategoryServiceTest {
         //Given
         Pageable pageable = PageRequest.of(0, 10);
 
-        CategoryResponseDto categoryDto = new CategoryResponseDto();
-        categoryDto.setId(CATEGORY_ID);
-        categoryDto.setName("Category 1");
-        categoryDto.setDescription("Test category");
+        CategoryResponseDto categoryDto = prepareCategoryResponseDto();
         List<CategoryResponseDto> expected = Arrays.asList(categoryDto);
+
+        Category category = prepareCategory();
 
         List<Category> categories = Arrays.asList(category);
         Page<Category> categoryPage = new PageImpl<>(categories, pageable, categories.size());
@@ -84,10 +67,8 @@ class CategoryServiceTest {
     @Test
     @DisplayName("Verify getById() with valid id returns need category from DB")
     void getById_ValidId_ShouldReturnCategory() {
-        CategoryResponseDto expected = new CategoryResponseDto();
-        expected.setId(CATEGORY_ID);
-        expected.setName("Category 1");
-        expected.setDescription("Test");
+        CategoryResponseDto expected = prepareCategoryResponseDto();
+        Category category = prepareCategory();
         when(categoryRepository.findById(CATEGORY_ID)).thenReturn(Optional.of(category));
         when(categoryMapper.toDto(category)).thenReturn(expected);
 
@@ -120,10 +101,8 @@ class CategoryServiceTest {
         categoryDto.setName("Category 1");
         categoryDto.setDescription("Test");
 
-        CategoryResponseDto expected = new CategoryResponseDto();
-        expected.setId(CATEGORY_ID);
-        expected.setName("Category 1");
-        expected.setDescription("Test");
+        CategoryResponseDto expected = prepareCategoryResponseDto();
+        Category category = prepareCategory();
 
         when(categoryMapper.toModel(categoryDto)).thenReturn(category);
         when(categoryRepository.save(category)).thenReturn(category);
@@ -147,6 +126,7 @@ class CategoryServiceTest {
         updatedCategory.setId(CATEGORY_ID);
 
         CategoryResponseDto expected = categoryMapper.toDto(updatedCategory);
+        Category category = prepareCategory();
 
         when(categoryRepository.findById(CATEGORY_ID)).thenReturn(Optional.of(category));
         when(categoryRepository.save(any(Category.class))).thenReturn(category);
@@ -183,5 +163,19 @@ class CategoryServiceTest {
         doNothing().when(categoryRepository).deleteById(CATEGORY_ID);
         categoryService.deleteById(CATEGORY_ID);
         verify(categoryRepository, times(1)).deleteById(CATEGORY_ID);
+    }
+
+    private Category prepareCategory() {
+        return new Category()
+                .setId(CATEGORY_ID)
+                .setName("Category 1")
+                .setDescription("Test");
+    }
+
+    private CategoryResponseDto prepareCategoryResponseDto() {
+        return new CategoryResponseDto()
+                .setId(CATEGORY_ID)
+                .setName("Category 1")
+                .setDescription("Test category");
     }
 }

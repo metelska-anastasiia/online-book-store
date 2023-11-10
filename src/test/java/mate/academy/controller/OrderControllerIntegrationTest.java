@@ -39,7 +39,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-class OrderControllerTest {
+class OrderControllerIntegrationTest {
     private static final Long VALID_ID = 1L;
     private static final int PAGE_NUMBER = 0;
     private static final int PAGE_SIZE = 10;

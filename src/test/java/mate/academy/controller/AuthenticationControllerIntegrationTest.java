@@ -31,7 +31,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-class AuthenticationControllerTest {
+class AuthenticationControllerIntegrationTest {
     private static MockMvc mockMvc;
     @Autowired
     private ObjectMapper objectMapper;
@@ -156,11 +156,3 @@ class AuthenticationControllerTest {
         assertEquals(expectedEmail, actualEmail);
     }
 }
-
-
-
-
-
-
-
-

@@ -40,12 +40,7 @@ class UserServiceTest {
     @Test
     @DisplayName("Register new user")
     void register_validUserRegistrationRequest_Success() throws RegistrationException {
-        UserRegistrationRequest request = new UserRegistrationRequest()
-                .setEmail("test@test.com")
-                .setPassword("test")
-                .setRepeatPassword("test")
-                .setFirstName("Alice")
-                .setLastName("Cooper");
+        UserRegistrationRequest request = prepareUserRegistrationRequest();
 
         Role role = new Role();
         role.setId(1L);
@@ -77,13 +72,8 @@ class UserServiceTest {
 
     @Test
     @DisplayName("Register new user when user already exists")
-    void register_userAlreadyExists_RegistrationException() throws RegistrationException {
-        UserRegistrationRequest request = new UserRegistrationRequest()
-                .setEmail("test@test.com")
-                .setPassword("test")
-                .setRepeatPassword("test")
-                .setFirstName("Alice")
-                .setLastName("Cooper");
+    void register_userAlreadyExists_RegistrationException() {
+        UserRegistrationRequest request = prepareUserRegistrationRequest();
 
         when(userRepository.findByEmail(request.getEmail()))
                 .thenReturn(Optional.of(new User()));
@@ -94,5 +84,14 @@ class UserServiceTest {
 
         assertEquals(RegistrationException.class, registrationException.getClass());
         assertEquals("User already exists", registrationException.getMessage());
+    }
+
+    private UserRegistrationRequest prepareUserRegistrationRequest() {
+        return new UserRegistrationRequest()
+                .setEmail("test@test.com")
+                .setPassword("test")
+                .setRepeatPassword("test")
+                .setFirstName("Alice")
+                .setLastName("Cooper");
     }
 }

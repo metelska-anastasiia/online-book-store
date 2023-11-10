@@ -17,7 +17,7 @@ import org.springframework.test.context.jdbc.Sql;
 
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-class CategoryRepositoryTest {
+class CategoryRepositoryIntegrationTest {
     private static final int PAGE_NUMBER = 0;
     private static final int PAGE_SIZE = 2;
 

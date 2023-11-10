@@ -31,9 +31,7 @@ import mate.academy.repository.order.OrderRepository;
 import mate.academy.repository.orderitem.OrderItemRepository;
 import mate.academy.repository.user.UserRepository;
 import mate.academy.service.impl.OrderServiceImpl;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -62,77 +60,24 @@ class OrderServiceImplTest {
     private OrderMapper orderMapper;
     @Mock
     private OrderItemMapper orderItemMapper;
-    @InjectMocks
-    private OrderServiceImpl orderService;
     @Mock
     private Authentication authentication;
-    private User user;
-    private Book book;
-    private OrderItem orderItem;
-    private Order order;
-    private CartItem cartItem;
-    private OrderItemResponseDto orderItemResponseDto;
-
-    @BeforeEach
-    void setUp() {
-        user = new User()
-                .setId(USER_ID)
-                .setFirstName("John")
-                .setLastName("Doe")
-                .setPassword("test")
-                .setEmail("john@doe.com");
-        book = new Book()
-                .setId(1L)
-                .setIsbn("123456789")
-                .setTitle("Title 1")
-                .setAuthor("Author 1")
-                .setPrice(BigDecimal.valueOf(100))
-                .setDescription("Description 1")
-                .setCoverImage("image1");
-        orderItem = new OrderItem()
-                .setId(1L)
-                .setQuantity(1)
-                .setBook(book)
-                .setPrice(BigDecimal.valueOf(100));
-        order = new Order()
-                .setUser(user)
-                .setOrderDate(LocalDateTime.of(2023, 11, 4, 11,30,1))
-                .setTotal(BigDecimal.valueOf(100))
-                .setStatus(Order.Status.NEW)
-                .setOrderItems(Set.of(orderItem))
-                .setId(1L);
-        cartItem = new CartItem()
-                .setBook(book)
-                .setQuantity(1)
-                .setId(1L);
-        orderItemResponseDto = new OrderItemResponseDto()
-                .setId(1L)
-                .setQuantity(1)
-                .setBookId(1L);
-    }
-
-    @AfterEach
-    void tearDown() {
-        user = null;
-        book = null;
-        orderItem = null;
-        order = null;
-        cartItem = null;
-        orderItemResponseDto = null;
-    }
+    @InjectMocks
+    private OrderServiceImpl orderService;
 
     @Test
     @DisplayName("Place order for valid user")
     void placeOrder_validUser_Success() {
+        User user = prepareUser();
         ShoppingCart shoppingCart = new ShoppingCart()
                 .setUser(user)
                 .setId(1L)
-                .setCartItems(Set.of(cartItem));
-
+                .setCartItems(Set.of(prepareCartItem()));
         when(authentication.getName()).thenReturn(user.getEmail());
         when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.of(user));
         when(shoppingCartRepository.findShoppingCartByUserId(user.getId()))
                 .thenReturn(Optional.of(shoppingCart));
+        Order order = prepareOrder();
         when(orderRepository.save(any(Order.class))).thenReturn(order);
 
         ShippingAddressRequestDto shippingAddressRequest = new ShippingAddressRequestDto()
@@ -161,13 +106,13 @@ class OrderServiceImplTest {
                 .setOrderStatus("NEW")
                 .setTotal(BigDecimal.valueOf(100))
                 .setUserId(USER_ID)
-                .setOrderItems(Set.of(orderItemResponseDto));
+                .setOrderItems(Set.of(prepareOrderItemResponseDto()));
         List<OrderResponseDto> expected = new ArrayList<>();
         expected.add(orderResponseDto);
-
+        Order order = prepareOrder();
         List<Order> orders = new ArrayList<>();
         orders.add(order);
-
+        User user = prepareUser();
         Pageable pageable = PageRequest.of(0, 10);
         Page<Order> ordersPage = new PageImpl<>(orders, pageable, orders.size());
         when(authentication.getName()).thenReturn(user.getEmail());
@@ -183,9 +128,11 @@ class OrderServiceImplTest {
     @Test
     @DisplayName("Get all order items for user with order id")
     void getAllOrderItems_validAuthenticationAndOrderId_Success() {
+        OrderItemResponseDto orderItemResponseDto = prepareOrderItemResponseDto();
         List<OrderItemResponseDto> expected = new ArrayList<>();
         expected.add(orderItemResponseDto);
-
+        User user = prepareUser();
+        Order order = prepareOrder();
         when(authentication.getName()).thenReturn(user.getEmail());
         when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.of(user));
         when(orderRepository.findByUserIdAndId(USER_ID, ORDER_ID)).thenReturn(Optional.of(order));
@@ -212,9 +159,11 @@ class OrderServiceImplTest {
     @Test
     @DisplayName("Get order item from order")
     void getSpecificOrderItem_validUserAndIds_success() {
+        OrderItemResponseDto orderItemResponseDto = prepareOrderItemResponseDto();
         List<OrderItemResponseDto> allOrderItems = new ArrayList<>();
         allOrderItems.add(orderItemResponseDto);
-
+        User user = prepareUser();
+        Order order = prepareOrder();
         when(authentication.getName()).thenReturn(user.getEmail());
         when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.of(user));
         when(orderRepository.findByUserIdAndId(USER_ID, ORDER_ID)).thenReturn(Optional.of(order));
@@ -228,13 +177,11 @@ class OrderServiceImplTest {
     @Test
     @DisplayName("Update order status")
     void updateOrderStatus_validData_Success() {
-        Order updatedOrder = new Order()
-                .setUser(user)
-                .setOrderDate(LocalDateTime.of(2023, 11, 4, 11,30,1))
-                .setTotal(BigDecimal.valueOf(100))
-                .setStatus(Order.Status.PROCEED)
-                .setOrderItems(Set.of(orderItem))
-                .setId(1L);
+        User user = prepareUser();
+
+        Order updatedOrder = prepareOrder()
+                .setStatus(Order.Status.PROCEED);
+
         OrderStatusDto statusDto = new OrderStatusDto()
                 .setStatus(Order.Status.PROCEED);
 
@@ -243,7 +190,8 @@ class OrderServiceImplTest {
                 .setOrderDate(LocalDateTime.of(2023, 11, 4, 11,30,1))
                 .setTotal(BigDecimal.valueOf(100))
                 .setUserId(USER_ID)
-                .setOrderItems(Set.of(orderItemResponseDto));
+                .setOrderItems(Set.of(prepareOrderItemResponseDto()));
+        Order order = prepareOrder();
 
         when(authentication.getName()).thenReturn(user.getEmail());
         when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.of(user));
@@ -254,5 +202,57 @@ class OrderServiceImplTest {
         OrderResponseDto actual = orderService
                 .updateOrderStatus(authentication, ORDER_ID, statusDto);
         assertEquals(expected, actual);
+    }
+
+    private User prepareUser() {
+        return new User()
+                .setId(USER_ID)
+                .setFirstName("John")
+                .setLastName("Doe")
+                .setPassword("test")
+                .setEmail("john@doe.com");
+    }
+
+    private Book prepareBook() {
+        return new Book()
+                .setId(1L)
+                .setIsbn("123456789")
+                .setTitle("Title 1")
+                .setAuthor("Author 1")
+                .setPrice(BigDecimal.valueOf(100))
+                .setDescription("Description 1")
+                .setCoverImage("image1");
+    }
+
+    private OrderItem prepareOrderItem() {
+        return new OrderItem()
+                .setId(1L)
+                .setQuantity(1)
+                .setBook(prepareBook())
+                .setPrice(BigDecimal.valueOf(100));
+    }
+
+    private Order prepareOrder() {
+        return new Order()
+                .setUser(prepareUser())
+                .setOrderDate(LocalDateTime.of(2023, 11, 4, 11,30,1))
+                .setTotal(BigDecimal.valueOf(100))
+                .setStatus(Order.Status.NEW)
+                .setOrderItems(Set.of(prepareOrderItem()))
+                .setId(1L);
+    }
+
+    private CartItem prepareCartItem() {
+        return new CartItem()
+                .setBook(prepareBook())
+                .setQuantity(1)
+                .setId(1L);
+    }
+
+    private OrderItemResponseDto prepareOrderItemResponseDto() {
+        return new OrderItemResponseDto()
+                .setId(1L)
+                .setQuantity(1)
+                .setBookId(1L);
     }
 }

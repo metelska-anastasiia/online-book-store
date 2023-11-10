@@ -23,8 +23,6 @@ import mate.academy.repository.cart.ShoppingCartRepository;
 import mate.academy.repository.cartitem.CartItemRepository;
 import mate.academy.repository.user.UserRepository;
 import mate.academy.service.impl.ShoppingCartServiceImpl;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -48,37 +46,6 @@ class ShoppingCartServiceImplTest {
     private Authentication authentication;
     @InjectMocks
     private ShoppingCartServiceImpl shoppingCartService;
-    private User user;
-    private Book book;
-    private ShoppingCart shoppingCart;
-
-    @BeforeEach
-    public void setUp() {
-        user = new User()
-                .setId(1L)
-                .setEmail("john@test.com")
-                .setPassword("john99")
-                .setFirstName("John")
-                .setLastName("Doe");
-
-        book = new Book()
-                .setId(BOOK_ID)
-                .setAuthor("Author 1")
-                .setTitle("Test Book")
-                .setPrice(BigDecimal.valueOf(200))
-                .setIsbn("12345");
-
-        shoppingCart = new ShoppingCart()
-                .setId(1L)
-                .setUser(user);
-    }
-
-    @AfterEach
-    public void cleanUp() {
-        user = null;
-        book = null;
-        shoppingCart = null;
-    }
 
     @Test
     @DisplayName("Add Item to Shopping Cart")
@@ -88,11 +55,11 @@ class ShoppingCartServiceImplTest {
                 .setQuantity(1);
 
         CartItem cartItem = new CartItem()
-                .setBook(book)
+                .setBook(prepareBook())
                 .setQuantity(cartItemRequestDto.getQuantity());
-
-        shoppingCart.setCartItems(Set.of(cartItem));
-
+        ShoppingCart shoppingCart = prepareShoppingCart()
+                .setCartItems(Set.of(cartItem));
+        User user = prepareUser();
         when(authentication.getName()).thenReturn(user.getEmail());
         when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.of(user));
         when(shoppingCartRepository.findShoppingCartByUserId(user.getId()))
@@ -116,7 +83,7 @@ class ShoppingCartServiceImplTest {
                 .setIsbn("54321");
 
         CartItem cartItem1 = new CartItem()
-                .setBook(book)
+                .setBook(prepareBook())
                 .setQuantity(1)
                 .setId(1L);
         CartItem cartItem2 = new CartItem()
@@ -140,12 +107,13 @@ class ShoppingCartServiceImplTest {
                 .setBookTitle(cartItem2.getBook().getTitle());
         Set<CartItemResponseDto> cartItemResponseDtoSet =
                 Set.of(cartItemResponseDto1, cartItemResponseDto2);
-
+        User user = prepareUser();
         ShoppingCartDto shoppingCartDto = new ShoppingCartDto();
         shoppingCartDto.setUserId(user.getId());
         shoppingCartDto.setCartItems(cartItemResponseDtoSet);
 
-        shoppingCart.setCartItems(cartItems);
+        ShoppingCart shoppingCart = prepareShoppingCart()
+                .setCartItems(cartItems);
 
         when(authentication.getName()).thenReturn(user.getEmail());
         when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.of(user));
@@ -163,12 +131,12 @@ class ShoppingCartServiceImplTest {
     @DisplayName("Update quantity of existing cart item")
     void updateBookQuantity_AllValidData_Success() {
         CartItem existingCartItem = new CartItem()
-                .setBook(book)
+                .setBook(prepareBook())
                 .setQuantity(1)
                 .setId(1L);
-
-        shoppingCart.setCartItems(Set.of(existingCartItem));
-
+        ShoppingCart shoppingCart = prepareShoppingCart()
+                .setCartItems(Set.of(existingCartItem));
+        User user = prepareUser();
         when(authentication.getName()).thenReturn(user.getEmail());
         when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.of(user));
         when(shoppingCartRepository.findShoppingCartByUserId(user.getId()))
@@ -186,5 +154,29 @@ class ShoppingCartServiceImplTest {
                 .findByIdAndShoppingCartId(existingCartItem.getId(), shoppingCart.getId());
         verify(cartItemRepository, times(1)).save(existingCartItem);
         assertEquals(3, newQuantity.getQuantity());
+    }
+
+    private User prepareUser() {
+        return new User()
+                .setId(1L)
+                .setEmail("john@test.com")
+                .setPassword("john99")
+                .setFirstName("John")
+                .setLastName("Doe");
+    }
+
+    private Book prepareBook() {
+        return new Book()
+                .setId(BOOK_ID)
+                .setAuthor("Author 1")
+                .setTitle("Test Book")
+                .setPrice(BigDecimal.valueOf(200))
+                .setIsbn("12345");
+    }
+
+    private ShoppingCart prepareShoppingCart() {
+        return new ShoppingCart()
+                .setId(1L)
+                .setUser(prepareUser());
     }
 }
