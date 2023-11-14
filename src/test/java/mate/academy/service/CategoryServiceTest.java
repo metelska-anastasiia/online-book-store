@@ -1,5 +1,8 @@
 package mate.academy.service;
 
+import static mate.academy.config.DatabaseHelper.prepareCategory;
+import static mate.academy.config.DatabaseHelper.prepareCategoryDto;
+import static mate.academy.config.DatabaseHelper.prepareCategoryResponseDto;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -97,9 +100,7 @@ class CategoryServiceTest {
     @Test
     @DisplayName("Verify save() returns correct category after saving")
     void save_ValidCategoryDto_ShouldSaveCategory() {
-        CategoryDto categoryDto = new CategoryDto();
-        categoryDto.setName("Category 1");
-        categoryDto.setDescription("Test");
+        CategoryDto categoryDto = prepareCategoryDto();
 
         CategoryResponseDto expected = prepareCategoryResponseDto();
         Category category = prepareCategory();
@@ -163,19 +164,5 @@ class CategoryServiceTest {
         doNothing().when(categoryRepository).deleteById(CATEGORY_ID);
         categoryService.deleteById(CATEGORY_ID);
         verify(categoryRepository, times(1)).deleteById(CATEGORY_ID);
-    }
-
-    private Category prepareCategory() {
-        return new Category()
-                .setId(CATEGORY_ID)
-                .setName("Category 1")
-                .setDescription("Test");
-    }
-
-    private CategoryResponseDto prepareCategoryResponseDto() {
-        return new CategoryResponseDto()
-                .setId(CATEGORY_ID)
-                .setName("Category 1")
-                .setDescription("Test category");
     }
 }

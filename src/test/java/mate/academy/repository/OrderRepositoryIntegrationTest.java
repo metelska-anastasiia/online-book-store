@@ -1,11 +1,11 @@
 package mate.academy.repository;
 
+import static mate.academy.config.DatabaseHelper.prepareOrder;
+import static mate.academy.config.DatabaseHelper.prepareUser;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.Optional;
 import mate.academy.model.Order;
 import mate.academy.model.User;
@@ -27,7 +27,6 @@ class OrderRepositoryIntegrationTest {
     private static final int PAGE_SIZE = 3;
     private static final Long USER_ID = 1L;
     private static final Long ORDER_ID = 2L;
-
     @Autowired
     private OrderRepository orderRepository;
 
@@ -58,7 +57,7 @@ class OrderRepositoryIntegrationTest {
             executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
     void findByUserIdAndId_validIds_Success() {
         User user = prepareUser();
-        Order expected = prepareOrder().setUser(user);
+        Order expected = prepareOrder(user, Order.Status.CANCELED, ORDER_ID);
 
         Optional<Order> actual = orderRepository.findByUserIdAndId(USER_ID, ORDER_ID);
 
@@ -77,27 +76,9 @@ class OrderRepositoryIntegrationTest {
             executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
     void findById_validId_Success() {
         User user = prepareUser();
-        Order expected = prepareOrder().setUser(user);
+        Order expected = prepareOrder(user, Order.Status.CANCELED, ORDER_ID);
         Optional<Order> actual = orderRepository.findById(ORDER_ID);
         assertFalse(actual.isEmpty());
         assertEquals(expected, actual.get());
-    }
-
-    private User prepareUser() {
-        return new User()
-                .setId(USER_ID)
-                .setEmail("john@test.com")
-                .setFirstName("John")
-                .setLastName("Doe")
-                .setPassword("test");
-    }
-
-    private Order prepareOrder() {
-        return new Order()
-                .setId(ORDER_ID)
-                .setStatus(Order.Status.CANCELED)
-                .setTotal(BigDecimal.valueOf(450))
-                .setOrderDate(LocalDateTime.of(2023, 9, 12, 00, 31, 58))
-                .setShippingAddress("Kyiv, NewPost110");
     }
 }

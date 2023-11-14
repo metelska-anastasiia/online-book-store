@@ -1,10 +1,10 @@
 package mate.academy.controller;
 
+import static mate.academy.config.DatabaseHelper.prepareBook;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.math.BigDecimal;
 import java.sql.Connection;
 import javax.sql.DataSource;
 import lombok.SneakyThrows;
@@ -19,6 +19,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.io.ClassPathResource;
@@ -34,27 +35,23 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class ShoppingCartControllerIntegrationTest {
     private static final Long BOOK_ID = 1L;
     private static final int EXPECTED_QTY = 2;
-
     private static MockMvc mockMvc;
     @Autowired
     private ObjectMapper objectMapper;
     @Autowired
     private ShoppingCartService shoppingCartService;
-
-    @AfterEach
-    void afterEach(@Autowired DataSource dataSource) {
-        teardown(dataSource);
-    }
+    @Autowired
+    private DataSource dataSource;
+    @Autowired
+    private WebApplicationContext applicationContext;
 
     @BeforeAll
-    static void beforeAll(
-            @Autowired DataSource dataSource,
-            @Autowired WebApplicationContext applicationContext
-    ) {
+    public void beforeAll() {
         mockMvc = MockMvcBuilders
                 .webAppContextSetup(applicationContext)
                 .apply(springSecurity())
@@ -63,12 +60,17 @@ class ShoppingCartControllerIntegrationTest {
     }
 
     @BeforeEach
-    void setUp(@Autowired DataSource dataSource) {
+    public void setUp() {
         setupDatabase(dataSource);
     }
 
+    @AfterEach
+    public void afterEach() {
+        teardown(dataSource);
+    }
+
     @SneakyThrows
-    static void teardown(DataSource dataSource) {
+    private void teardown(DataSource dataSource) {
         try (Connection connection = dataSource.getConnection()) {
             connection.setAutoCommit(true);
             ScriptUtils.executeSqlScript(
@@ -79,7 +81,7 @@ class ShoppingCartControllerIntegrationTest {
     }
 
     @SneakyThrows
-    static void setupDatabase(DataSource dataSource) {
+    private void setupDatabase(DataSource dataSource) {
         try (Connection connection = dataSource.getConnection()) {
             connection.setAutoCommit(true);
             ScriptUtils.executeSqlScript(
@@ -93,15 +95,7 @@ class ShoppingCartControllerIntegrationTest {
     @DisplayName("Add book to shopping cart with valid user")
     @WithMockUser(username = "john@test.com", password = "test", authorities = {"USER"})
     void addBook_validUserAndCartItemRequestDto() throws Exception {
-        Book book = new Book()
-                .setId(BOOK_ID)
-                .setAuthor("Author 1")
-                .setTitle("Book 1")
-                .setPrice(BigDecimal.valueOf(100))
-                .setIsbn("ISBN-123456")
-                .setDescription("Description for Book 1")
-                .setCoverImage("image1.jpg");
-
+        Book book = prepareBook();
         CartItemRequestDto requestDto = new CartItemRequestDto()
                 .setBookId(book.getId())
                 .setQuantity(1);

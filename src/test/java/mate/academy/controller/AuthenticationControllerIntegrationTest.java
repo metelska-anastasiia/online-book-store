@@ -1,5 +1,7 @@
 package mate.academy.controller;
 
+import static mate.academy.config.DatabaseHelper.prepareExpectedUserResponse;
+import static mate.academy.config.DatabaseHelper.prepareUserRegistrationRequest;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -20,6 +22,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.io.ClassPathResource;
@@ -30,8 +33,13 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class AuthenticationControllerIntegrationTest {
+    private static final String TEST_EMAIL = "newuser@test.com";
+    private static final String TEST_PASSWORD = "Newuser12345";
+    private static final String TEST_FIRST_NAME = "User";
+    private static final String TEST_LAST_NAME = "New";
     private static MockMvc mockMvc;
     @Autowired
     private ObjectMapper objectMapper;
@@ -39,12 +47,13 @@ class AuthenticationControllerIntegrationTest {
     private AuthenticationService authenticationService;
     @Autowired
     private JwtUtil jwtUtil;
+    @Autowired
+    private DataSource dataSource;
+    @Autowired
+    private WebApplicationContext applicationContext;
 
     @BeforeAll
-    static void beforeAll(
-            @Autowired DataSource dataSource,
-            @Autowired WebApplicationContext applicationContext
-    ) {
+    public void beforeAll() {
         mockMvc = MockMvcBuilders
                 .webAppContextSetup(applicationContext)
                 .apply(springSecurity())
@@ -53,17 +62,17 @@ class AuthenticationControllerIntegrationTest {
     }
 
     @BeforeEach
-    void setUp(@Autowired DataSource dataSource) {
+    public void setUp() {
         setupDatabase(dataSource);
     }
 
     @AfterEach
-    void afterEach(@Autowired DataSource dataSource) {
+    public void afterEach() {
         teardown(dataSource);
     }
 
     @SneakyThrows
-    static void teardown(DataSource dataSource) {
+    private void teardown(DataSource dataSource) {
         try (Connection connection = dataSource.getConnection()) {
             connection.setAutoCommit(true);
             ScriptUtils.executeSqlScript(
@@ -87,7 +96,7 @@ class AuthenticationControllerIntegrationTest {
     }
 
     @SneakyThrows
-    static void setupDatabase(DataSource dataSource) {
+    private void setupDatabase(DataSource dataSource) {
         try (Connection connection = dataSource.getConnection()) {
             connection.setAutoCommit(true);
             ScriptUtils.executeSqlScript(
@@ -101,18 +110,14 @@ class AuthenticationControllerIntegrationTest {
     @Test
     @DisplayName("Register new user")
     void register_validRequest_Success() throws Exception {
-        UserRegistrationRequest request = new UserRegistrationRequest()
-                .setEmail("newuser@test.com")
-                .setPassword("Newuser12345")
-                .setRepeatPassword("Newuser12345")
-                .setFirstName("User")
-                .setLastName("New");
+        UserRegistrationRequest request = prepareUserRegistrationRequest(
+                TEST_EMAIL,
+                TEST_PASSWORD,
+                TEST_FIRST_NAME,
+                TEST_LAST_NAME
+        );
 
-        UserResponseDto expected = new UserResponseDto()
-                .setId(3L)
-                .setEmail(request.getEmail())
-                .setFirstName(request.getFirstName())
-                .setLastName(request.getLastName());
+        UserResponseDto expected = prepareExpectedUserResponse(request);
 
         String jsonRequest = objectMapper.writeValueAsString(request);
 

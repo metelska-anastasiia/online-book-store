@@ -1,5 +1,9 @@
 package mate.academy.service;
 
+import static mate.academy.config.DatabaseHelper.prepareBook;
+import static mate.academy.config.DatabaseHelper.prepareBookDto;
+import static mate.academy.config.DatabaseHelper.prepareBookDtoWithoutCategories;
+import static mate.academy.config.DatabaseHelper.prepareCreateBookRequestDto;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -15,7 +19,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import mate.academy.dto.book.BookDto;
 import mate.academy.dto.book.BookDtoWithoutCategoryIds;
 import mate.academy.dto.book.BookSearchParameters;
@@ -26,8 +29,6 @@ import mate.academy.model.Book;
 import mate.academy.repository.book.BookRepository;
 import mate.academy.repository.book.BookSpecificationBuilder;
 import mate.academy.service.impl.BookServiceImpl;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -44,6 +45,8 @@ import org.springframework.data.jpa.domain.Specification;
 class BookServiceTest {
     private static final Long BOOK_ID = 1L;
     private static final Long INVALID_BOOK_ID = -1000L;
+    private static final String BOOK_AUTHOR_1 = "Author 1";
+    private static final String BOOK_TITLE_1 = "Book 1";
     @Mock
     private BookRepository bookRepository;
     @Mock
@@ -52,54 +55,19 @@ class BookServiceTest {
     private BookSpecificationBuilder bookSpecificationBuilder;
     @InjectMocks
     private BookServiceImpl bookService;
-    private Book book1;
-    private Book book2;
-
-    @BeforeEach
-    public void setUp() {
-        book1 = new Book()
-                .setId(BOOK_ID)
-                .setAuthor("Author 1")
-                .setTitle("Test Book")
-                .setPrice(BigDecimal.valueOf(200))
-                .setDescription("New book1 to test")
-                .setCoverImage("image.jpg")
-                .setIsbn("12345");
-
-        book2 = new Book()
-                .setId(2L)
-                .setAuthor("Author 2")
-                .setTitle("Test Book 2")
-                .setPrice(BigDecimal.valueOf(340))
-                .setDescription("New book2 to test")
-                .setCoverImage("image.jpg")
-                .setIsbn("12345678");
-    }
-
-    @AfterEach
-    public void cleanUp() {
-        book1 = null;
-        book2 = null;
-    }
 
     @Test
     @DisplayName("Verify save() method. Correct book returns after saving")
     void save_ValidCreateBookRequestDto_ShouldSaveBook() {
         //Given
-        CreateBookRequestDto createBookRequestDto = new CreateBookRequestDto()
-                .setTitle("Test Book")
-                .setAuthor("Author 1")
-                .setIsbn("12345")
-                .setPrice(BigDecimal.valueOf(200))
-                .setDescription("New book to test")
-                .setCoverImage("image.jpg")
-                .setCategoryIds(Set.of(1L));
+        CreateBookRequestDto createBookRequestDto = prepareCreateBookRequestDto();
 
         BookDto expected = prepareBookDto();
+        Book book = prepareBook();
 
-        when(bookMapper.toModel(createBookRequestDto)).thenReturn(book1);
-        when(bookRepository.save(book1)).thenReturn(book1);
-        when(bookMapper.toDto(book1)).thenReturn(expected);
+        when(bookMapper.toModel(createBookRequestDto)).thenReturn(book);
+        when(bookRepository.save(book)).thenReturn(book);
+        when(bookMapper.toDto(book)).thenReturn(expected);
 
         //When
         BookDto actual = bookService.save(createBookRequestDto);
@@ -117,12 +85,13 @@ class BookServiceTest {
         BookDto bookDto = prepareBookDto();
         List<BookDto> expected = new ArrayList<>();
         expected.add(bookDto);
+        Book book = prepareBook();
 
-        List<Book> books = List.of(book1);
+        List<Book> books = List.of(book);
         Page<Book> bookPage = new PageImpl<>(books, pageable, books.size());
 
         when(bookRepository.findAll(pageable)).thenReturn(bookPage);
-        when(bookMapper.toDto(book1)).thenReturn(bookDto);
+        when(bookMapper.toDto(book)).thenReturn(bookDto);
 
         //When
         List<BookDto> actual = bookService.findAll(pageable);
@@ -131,7 +100,7 @@ class BookServiceTest {
         assertEquals(expected, actual);
 
         verify(bookRepository, times(1)).findAll(pageable);
-        verify(bookMapper, times(1)).toDto(book1);
+        verify(bookMapper, times(1)).toDto(book);
         verifyNoMoreInteractions(bookRepository, bookMapper);
     }
 
@@ -140,9 +109,10 @@ class BookServiceTest {
     void findById_ValidBookId_ShouldFindBook() {
         //Given
         BookDto expected = prepareBookDto();
+        Book book = prepareBook();
 
-        when(bookRepository.findById(BOOK_ID)).thenReturn(Optional.of(book1));
-        when(bookMapper.toDto(book1)).thenReturn(expected);
+        when(bookRepository.findById(BOOK_ID)).thenReturn(Optional.of(book));
+        when(bookMapper.toDto(book)).thenReturn(expected);
 
         //When
         BookDto actual = bookService.findById(BOOK_ID);
@@ -181,17 +151,26 @@ class BookServiceTest {
     @Test
     @DisplayName("Verify search() searches books by input parameters")
     void search_ValidSearchParameters_ShouldReturnListOfBooks() {
-        String[] authorParams = {"Author1", "Author 2"};
-        String[] titleParams = {"Test Book", "Test Book 2"};
+        String[] authorParams = {BOOK_AUTHOR_1, "Author 2"};
+        String[] titleParams = {BOOK_TITLE_1, "Test Book 2"};
 
         BookSearchParameters searchParameters =
                 new BookSearchParameters(authorParams, titleParams);
 
         Specification<Book> specification = bookSpecificationBuilder.build(searchParameters);
+        Book book = prepareBook();
+        Book secondBook = new Book()
+                .setId(2L)
+                .setAuthor("Author 2")
+                .setTitle("Test Book 2")
+                .setPrice(BigDecimal.valueOf(340))
+                .setDescription("New book2 to test")
+                .setCoverImage("image.jpg")
+                .setIsbn("12345678");
 
         List<Book> mockBooks = new ArrayList<>();
-        mockBooks.add(book1);
-        mockBooks.add(book2);
+        mockBooks.add(book);
+        mockBooks.add(secondBook);
 
         when(bookRepository.findAll(
                 specification)).thenReturn(mockBooks);
@@ -226,8 +205,9 @@ class BookServiceTest {
         updatedBook.setIsbn(bookRequestDto.getIsbn());
 
         BookDto expected = bookMapper.toDto(updatedBook);
+        Book book = prepareBook();
 
-        when(bookRepository.findById(BOOK_ID)).thenReturn(Optional.of(book1));
+        when(bookRepository.findById(BOOK_ID)).thenReturn(Optional.of(book));
         when(bookRepository.save(any(Book.class))).thenReturn(updatedBook);
 
         //When
@@ -261,16 +241,9 @@ class BookServiceTest {
     void findAllByCategoryId_validCategoryId_ShouldReturnListOfBooks() {
         //Given
         List<Book> bookList = new ArrayList<>();
-        bookList.add(book1);
+        bookList.add(prepareBook());
 
-        BookDtoWithoutCategoryIds bookDtoWithoutCategoryIds = new BookDtoWithoutCategoryIds()
-                .setId(1L)
-                .setAuthor("Author 1")
-                .setTitle("Test Book")
-                .setPrice(BigDecimal.valueOf(200))
-                .setDescription("New book1 to test")
-                .setCoverImage("image.jpg")
-                .setIsbn("12345");
+        BookDtoWithoutCategoryIds bookDtoWithoutCategoryIds = prepareBookDtoWithoutCategories();
 
         List<BookDtoWithoutCategoryIds> expected = Arrays.asList(
                 bookDtoWithoutCategoryIds
@@ -284,16 +257,5 @@ class BookServiceTest {
 
         //Then
         assertEquals(expected, actual);
-    }
-
-    private BookDto prepareBookDto() {
-        return new BookDto()
-                .setId(1L)
-                .setAuthor("Author 1")
-                .setTitle("Test Book")
-                .setPrice(BigDecimal.valueOf(200))
-                .setDescription("New book to test")
-                .setCoverImage("image.jpg")
-                .setIsbn("12345");
     }
 }

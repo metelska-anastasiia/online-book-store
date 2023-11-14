@@ -1,11 +1,11 @@
 package mate.academy.repository;
 
+import static mate.academy.config.DatabaseHelper.prepareBook;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.Mockito.when;
 
 import jakarta.persistence.criteria.Predicate;
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -92,7 +92,12 @@ class BookRepositoryIntegrationTest {
             "classpath:database/repository/book/after/remove-from-categories.sql"
     }, executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
     void findById_validId_ShouldReturnBook() {
-        Book expected = prepareBookWithCategories();
+        Book expected = prepareBook()
+                .setCategories(Set.of(new Category()
+                        .setId(1L)
+                        .setName("Poetry")
+                        .setDescription("Poems that you will love"))
+                );
         Optional<Book> actual = bookRepository.findById(BOOK_ID);
         assertFalse(actual.isEmpty());
         assertEquals(expected, actual.get());
@@ -125,25 +130,15 @@ class BookRepositoryIntegrationTest {
         when(bookSpecificationBuilder.build(bookSearchParameters)).thenReturn(spec);
 
         List<Book> expected = new ArrayList<>();
-        expected.add(prepareBookWithCategories());
-
-        List<Book> actual = bookRepository.findAll(spec);
-
-        assertEquals(expected, actual);
-    }
-
-    private Book prepareBookWithCategories() {
-        return new Book().setId(1L)
-                .setTitle("Book 1")
-                .setAuthor("Author 1")
-                .setIsbn("ISBN-123456")
-                .setPrice(BigDecimal.valueOf(100))
-                .setDescription("Description for Book 1")
-                .setCoverImage("image1.jpg")
+        expected.add(prepareBook()
                 .setCategories(Set.of(new Category()
                         .setId(1L)
                         .setName("Poetry")
                         .setDescription("Poems that you will love"))
-                );
+                ));
+
+        List<Book> actual = bookRepository.findAll(spec);
+
+        assertEquals(expected, actual);
     }
 }

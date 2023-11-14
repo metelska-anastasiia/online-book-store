@@ -1,5 +1,6 @@
 package mate.academy.controller;
 
+import static mate.academy.config.DatabaseHelper.prepareBookDto;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -28,6 +29,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.io.ClassPathResource;
@@ -42,6 +44,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 import org.testcontainers.shaded.org.apache.commons.lang3.builder.EqualsBuilder;
 
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class BookControllerIntegrationTest {
     private static final int PAGE_NUMBER = 0;
@@ -53,11 +56,13 @@ class BookControllerIntegrationTest {
     private ObjectMapper objectMapper;
     @Autowired
     private BookService bookService;
+    @Autowired
+    private DataSource dataSource;
+    @Autowired
+    private WebApplicationContext applicationContext;
 
     @BeforeAll
-    static void beforeAll(
-            @Autowired DataSource dataSource,
-            @Autowired WebApplicationContext applicationContext
+    public void beforeAll(
     ) {
         mockMvc = MockMvcBuilders
                 .webAppContextSetup(applicationContext)
@@ -67,17 +72,17 @@ class BookControllerIntegrationTest {
     }
 
     @BeforeEach
-    void setUp(@Autowired DataSource dataSource) {
+    public void setUp() {
         setupDatabase(dataSource);
     }
 
     @AfterEach
-    void afterEach(@Autowired DataSource dataSource) {
+    public void afterEach() {
         teardown(dataSource);
     }
 
     @SneakyThrows
-    static void teardown(DataSource dataSource) {
+    private void teardown(DataSource dataSource) {
         try (Connection connection = dataSource.getConnection()) {
             connection.setAutoCommit(true);
             ScriptUtils.executeSqlScript(
@@ -88,7 +93,7 @@ class BookControllerIntegrationTest {
     }
 
     @SneakyThrows
-    static void setupDatabase(DataSource dataSource) {
+    private void setupDatabase(DataSource dataSource) {
         try (Connection connection = dataSource.getConnection()) {
             connection.setAutoCommit(true);
             ScriptUtils.executeSqlScript(
@@ -283,17 +288,5 @@ class BookControllerIntegrationTest {
         BookDto actual = objectMapper.readValue(jsonResponse, BookDto.class);
         assertNotNull(actual);
         EqualsBuilder.reflectionEquals(expected, actual);
-    }
-
-    private BookDto prepareBookDto() {
-        return new BookDto()
-                .setId(1L)
-                .setTitle("Book 1")
-                .setAuthor("Author 1")
-                .setIsbn("ISBN-123456")
-                .setPrice(BigDecimal.valueOf(100))
-                .setDescription("Description for Book 1")
-                .setCoverImage("image1.jpg")
-                .setCategoryIds(Set.of());
     }
 }

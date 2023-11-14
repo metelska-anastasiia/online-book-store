@@ -29,6 +29,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.io.ClassPathResource;
@@ -43,6 +44,7 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class CategoryControllerIntegrationTest {
     private static final int PAGE_NUMBER = 0;
@@ -54,12 +56,13 @@ class CategoryControllerIntegrationTest {
     private ObjectMapper objectMapper;
     @Autowired
     private CategoryService categoryService;
+    @Autowired
+    private DataSource dataSource;
+    @Autowired
+    private WebApplicationContext applicationContext;
 
     @BeforeAll
-    static void beforeAll(
-            @Autowired DataSource dataSource,
-            @Autowired WebApplicationContext applicationContext
-    ) {
+    public void beforeAll() {
         mockMvc = MockMvcBuilders
                 .webAppContextSetup(applicationContext)
                 .apply(springSecurity())
@@ -68,17 +71,17 @@ class CategoryControllerIntegrationTest {
     }
 
     @BeforeEach
-    void setUp(@Autowired DataSource dataSource) {
+    public void setUp() {
         setupDatabase(dataSource);
     }
 
     @AfterEach
-    void afterEach(@Autowired DataSource dataSource) {
+    public void afterEach() {
         teardown(dataSource);
     }
 
     @SneakyThrows
-    static void teardown(DataSource dataSource) {
+    private void teardown(DataSource dataSource) {
         try (Connection connection = dataSource.getConnection()) {
             connection.setAutoCommit(true);
             ScriptUtils.executeSqlScript(
@@ -89,7 +92,7 @@ class CategoryControllerIntegrationTest {
     }
 
     @SneakyThrows
-    static void setupDatabase(DataSource dataSource) {
+    private void setupDatabase(DataSource dataSource) {
         try (Connection connection = dataSource.getConnection()) {
             connection.setAutoCommit(true);
             ScriptUtils.executeSqlScript(
@@ -106,7 +109,7 @@ class CategoryControllerIntegrationTest {
     void createCategory_validCategoryDto_Success() throws Exception {
         CategoryDto requestDto = new CategoryDto()
                 .setName("New Category")
-                .setDescription("Nre description");
+                .setDescription("New description");
 
         CategoryResponseDto expected = new CategoryResponseDto()
                 .setDescription(requestDto.getDescription())

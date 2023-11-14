@@ -1,9 +1,12 @@
 package mate.academy.repository;
 
+import static mate.academy.config.DatabaseHelper.prepareBook;
+import static mate.academy.config.DatabaseHelper.prepareCartItem;
+import static mate.academy.config.DatabaseHelper.prepareShoppingCart;
+import static mate.academy.config.DatabaseHelper.prepareUser;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
-import java.math.BigDecimal;
 import java.util.Optional;
 import java.util.Set;
 import mate.academy.model.Book;
@@ -23,8 +26,7 @@ import org.springframework.test.context.jdbc.Sql;
 class CartItemRepositoryIntegrationTest {
     private static final Long CART_ITEM_ID = 1L;
     private static final Long SHOPPING_CART_ID = 1L;
-    private static final Long BOOK_ID = 1L;
-
+    private static final int QUANTITY = 5;
     @Autowired
     private CartItemRepository cartItemRepository;
 
@@ -44,19 +46,13 @@ class CartItemRepositoryIntegrationTest {
             "classpath:database/repository/cartItem/after/remove-from-users.sql",
     }, executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
     void findByIdAndShoppingCartId_validIds_Success() {
-        Book expectedBook = new Book()
-                .setId(BOOK_ID)
-                .setAuthor("Author 1")
-                .setTitle("Book 1")
-                .setPrice(BigDecimal.valueOf(100))
-                .setIsbn("ISBN-123456")
-                .setDescription("Description for Book 1")
-                .setCoverImage("image1.jpg");
+        Book expectedBook = prepareBook();
 
-        CartItem expectedCartItem = new CartItem()
-                .setBook(expectedBook)
-                .setId(1L)
-                .setQuantity(5);
+        CartItem expectedCartItem = prepareCartItem(
+                expectedBook,
+                CART_ITEM_ID,
+                QUANTITY
+        );
 
         Optional<CartItem> actual = cartItemRepository
                 .findByIdAndShoppingCartId(CART_ITEM_ID, SHOPPING_CART_ID);
@@ -65,17 +61,9 @@ class CartItemRepositoryIntegrationTest {
         assertEquals(expectedBook, actual.get().getBook());
         assertEquals(expectedCartItem, actual.get());
 
-        User user = new User()
-                .setId(1L)
-                .setEmail("john@test.com")
-                .setFirstName("John")
-                .setLastName("Doe")
-                .setPassword("test");
-
-        ShoppingCart expectedShoppingCart = new ShoppingCart()
-                .setId(1L)
-                .setCartItems(Set.of(expectedCartItem))
-                .setUser(user);
+        User user = prepareUser();
+        Set<CartItem> cartItems = Set.of(expectedCartItem);
+        ShoppingCart expectedShoppingCart = prepareShoppingCart(user, cartItems);
 
         assertEquals(expectedShoppingCart, actual.get().getShoppingCart());
     }

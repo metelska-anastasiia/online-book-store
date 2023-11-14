@@ -1,9 +1,12 @@
 package mate.academy.repository;
 
+import static mate.academy.config.DatabaseHelper.prepareBook;
+import static mate.academy.config.DatabaseHelper.prepareCartItem;
+import static mate.academy.config.DatabaseHelper.prepareShoppingCart;
+import static mate.academy.config.DatabaseHelper.prepareUser;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
-import java.math.BigDecimal;
 import java.util.Optional;
 import java.util.Set;
 import mate.academy.model.Book;
@@ -21,7 +24,8 @@ import org.springframework.test.context.jdbc.Sql;
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 class ShoppingCartRepositoryIntegrationTest {
     private static final Long USER_ID = 1L;
-    private static final Long BOOK_ID = 1L;
+    private static final Long CART_ITEM_ID = 1L;
+    private static final int QUANTITY = 5;
     @Autowired
     private ShoppingCartRepository shoppingCartRepository;
 
@@ -39,31 +43,10 @@ class ShoppingCartRepositoryIntegrationTest {
             "classpath:database/repository/cart/after/remove-from-users.sql",
     }, executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
     void findShoppingCartByUserId_validId_Success() {
-        User user = new User()
-                .setId(USER_ID)
-                .setEmail("john@test.com")
-                .setFirstName("John")
-                .setLastName("Doe")
-                .setPassword("test");
-
-        Book expectedBook = new Book()
-                .setId(BOOK_ID)
-                .setAuthor("Author 1")
-                .setTitle("Book 1")
-                .setPrice(BigDecimal.valueOf(100))
-                .setIsbn("ISBN-123456")
-                .setDescription("Description for Book 1")
-                .setCoverImage("image1.jpg");
-
-        CartItem expectedCartItem = new CartItem()
-                .setBook(expectedBook)
-                .setId(1L)
-                .setQuantity(5);
-
-        ShoppingCart expected = new ShoppingCart()
-                .setId(1L)
-                .setUser(user)
-                .setCartItems(Set.of(expectedCartItem));
+        User user = prepareUser();
+        Book expectedBook = prepareBook();
+        CartItem expectedCartItem = prepareCartItem(expectedBook, CART_ITEM_ID, QUANTITY);
+        ShoppingCart expected = prepareShoppingCart(user, Set.of(expectedCartItem));
 
         Optional<ShoppingCart> actual = shoppingCartRepository
                 .findShoppingCartByUserId(USER_ID);

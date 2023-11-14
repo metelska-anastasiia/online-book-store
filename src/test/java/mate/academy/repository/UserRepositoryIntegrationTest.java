@@ -1,5 +1,6 @@
 package mate.academy.repository;
 
+import static mate.academy.config.DatabaseHelper.prepareUser;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -32,13 +33,7 @@ class UserRepositoryIntegrationTest {
             executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD
     )
     void findByEmail_validEmail_Success() {
-        User expected = new User()
-                .setId(1L)
-                .setEmail("john@test.com")
-                .setPassword("test")
-                .setFirstName("John")
-                .setLastName("Doe");
-
+        User expected = prepareUser();
         User actual = userRepository.findByEmail(VALID_EMAIL).get();
         assertEquals(expected, actual);
     }

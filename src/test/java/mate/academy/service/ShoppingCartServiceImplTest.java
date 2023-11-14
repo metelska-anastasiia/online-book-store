@@ -1,5 +1,9 @@
 package mate.academy.service;
 
+import static mate.academy.config.DatabaseHelper.prepareBook;
+import static mate.academy.config.DatabaseHelper.prepareCartItem;
+import static mate.academy.config.DatabaseHelper.prepareShoppingCart;
+import static mate.academy.config.DatabaseHelper.prepareUser;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
@@ -53,13 +57,9 @@ class ShoppingCartServiceImplTest {
         CartItemRequestDto cartItemRequestDto = new CartItemRequestDto()
                 .setBookId(BOOK_ID)
                 .setQuantity(1);
-
-        CartItem cartItem = new CartItem()
-                .setBook(prepareBook())
-                .setQuantity(cartItemRequestDto.getQuantity());
-        ShoppingCart shoppingCart = prepareShoppingCart()
-                .setCartItems(Set.of(cartItem));
+        CartItem cartItem = prepareCartItem(prepareBook(), 1L, cartItemRequestDto.getQuantity());
         User user = prepareUser();
+        ShoppingCart shoppingCart = prepareShoppingCart(user, Set.of(cartItem));
         when(authentication.getName()).thenReturn(user.getEmail());
         when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.of(user));
         when(shoppingCartRepository.findShoppingCartByUserId(user.getId()))
@@ -82,14 +82,8 @@ class ShoppingCartServiceImplTest {
                 .setPrice(BigDecimal.valueOf(300))
                 .setIsbn("54321");
 
-        CartItem cartItem1 = new CartItem()
-                .setBook(prepareBook())
-                .setQuantity(1)
-                .setId(1L);
-        CartItem cartItem2 = new CartItem()
-                .setBook(book2)
-                .setQuantity(1)
-                .setId(2L);
+        CartItem cartItem1 = prepareCartItem(prepareBook(), 1L, 1);
+        CartItem cartItem2 = prepareCartItem(book2, 2L, 1);
 
         Set<CartItem> cartItems = new HashSet<>();
         cartItems.add(cartItem1);
@@ -108,12 +102,12 @@ class ShoppingCartServiceImplTest {
         Set<CartItemResponseDto> cartItemResponseDtoSet =
                 Set.of(cartItemResponseDto1, cartItemResponseDto2);
         User user = prepareUser();
+
         ShoppingCartDto shoppingCartDto = new ShoppingCartDto();
         shoppingCartDto.setUserId(user.getId());
         shoppingCartDto.setCartItems(cartItemResponseDtoSet);
 
-        ShoppingCart shoppingCart = prepareShoppingCart()
-                .setCartItems(cartItems);
+        ShoppingCart shoppingCart = prepareShoppingCart(user, cartItems);
 
         when(authentication.getName()).thenReturn(user.getEmail());
         when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.of(user));
@@ -130,13 +124,10 @@ class ShoppingCartServiceImplTest {
     @Test
     @DisplayName("Update quantity of existing cart item")
     void updateBookQuantity_AllValidData_Success() {
-        CartItem existingCartItem = new CartItem()
-                .setBook(prepareBook())
-                .setQuantity(1)
-                .setId(1L);
-        ShoppingCart shoppingCart = prepareShoppingCart()
-                .setCartItems(Set.of(existingCartItem));
         User user = prepareUser();
+        CartItem existingCartItem = prepareCartItem(prepareBook(), 1L, 1);
+        ShoppingCart shoppingCart = prepareShoppingCart(user, Set.of(existingCartItem));
+
         when(authentication.getName()).thenReturn(user.getEmail());
         when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.of(user));
         when(shoppingCartRepository.findShoppingCartByUserId(user.getId()))
@@ -154,29 +145,5 @@ class ShoppingCartServiceImplTest {
                 .findByIdAndShoppingCartId(existingCartItem.getId(), shoppingCart.getId());
         verify(cartItemRepository, times(1)).save(existingCartItem);
         assertEquals(3, newQuantity.getQuantity());
-    }
-
-    private User prepareUser() {
-        return new User()
-                .setId(1L)
-                .setEmail("john@test.com")
-                .setPassword("john99")
-                .setFirstName("John")
-                .setLastName("Doe");
-    }
-
-    private Book prepareBook() {
-        return new Book()
-                .setId(BOOK_ID)
-                .setAuthor("Author 1")
-                .setTitle("Test Book")
-                .setPrice(BigDecimal.valueOf(200))
-                .setIsbn("12345");
-    }
-
-    private ShoppingCart prepareShoppingCart() {
-        return new ShoppingCart()
-                .setId(1L)
-                .setUser(prepareUser());
     }
 }

@@ -1,5 +1,6 @@
 package mate.academy.controller;
 
+import static mate.academy.config.DatabaseHelper.prepareOrderItemResponseDto;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 
@@ -21,6 +22,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.io.ClassPathResource;
@@ -38,22 +40,25 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class OrderControllerIntegrationTest {
     private static final Long VALID_ID = 1L;
     private static final int PAGE_NUMBER = 0;
     private static final int PAGE_SIZE = 10;
+    private static final int QUANTITY = 1;
     private static MockMvc mockMvc;
     @Autowired
     private ObjectMapper objectMapper;
     @Autowired
     private OrderService orderService;
+    @Autowired
+    private DataSource dataSource;
+    @Autowired
+    private WebApplicationContext applicationContext;
 
     @BeforeAll
-    static void beforeAll(
-            @Autowired DataSource dataSource,
-            @Autowired WebApplicationContext applicationContext
-    ) {
+    public void beforeAll() {
         mockMvc = MockMvcBuilders
                 .webAppContextSetup(applicationContext)
                 .apply(springSecurity())
@@ -62,17 +67,17 @@ class OrderControllerIntegrationTest {
     }
 
     @BeforeEach
-    void setUp(@Autowired DataSource dataSource) {
+    public void setUp() {
         setupDatabase(dataSource);
     }
 
     @AfterEach
-    void afterEach(@Autowired DataSource dataSource) {
+    public void afterEach() {
         teardown(dataSource);
     }
 
     @SneakyThrows
-    static void teardown(DataSource dataSource) {
+    private void teardown(DataSource dataSource) {
         try (Connection connection = dataSource.getConnection()) {
             connection.setAutoCommit(true);
             ScriptUtils.executeSqlScript(
@@ -83,7 +88,7 @@ class OrderControllerIntegrationTest {
     }
 
     @SneakyThrows
-    static void setupDatabase(DataSource dataSource) {
+    private void setupDatabase(DataSource dataSource) {
         try (Connection connection = dataSource.getConnection()) {
             connection.setAutoCommit(true);
             ScriptUtils.executeSqlScript(
@@ -136,10 +141,9 @@ class OrderControllerIntegrationTest {
     @DisplayName("Get all items by order id")
     @WithMockUser(username = "john@test.com", password = "test", authorities = {"USER"})
     void getAllItemsByOrderId_validId_Success() throws Exception {
-        OrderItemResponseDto itemResponseDto = new OrderItemResponseDto()
-                .setBookId(VALID_ID)
-                .setQuantity(1)
-                .setId(VALID_ID);
+        OrderItemResponseDto itemResponseDto =
+                prepareOrderItemResponseDto(QUANTITY, VALID_ID);
+
         List<OrderItemResponseDto> expected = new ArrayList<>();
         expected.add(itemResponseDto);
 
@@ -167,10 +171,7 @@ class OrderControllerIntegrationTest {
     @DisplayName("Get specific order item by order id and item id")
     @WithMockUser(username = "john@test.com", password = "test", authorities = {"USER"})
     void getOrderItemByOrderIdAndItemId_validIds_Success() throws Exception {
-        OrderItemResponseDto expected = new OrderItemResponseDto()
-                .setId(VALID_ID)
-                .setBookId(VALID_ID)
-                .setQuantity(1);
+        OrderItemResponseDto expected = prepareOrderItemResponseDto(QUANTITY, VALID_ID);
 
         MvcResult mvcResult = mockMvc.perform(
                         MockMvcRequestBuilders.get("/api/orders/1/items/1")
@@ -207,5 +208,4 @@ class OrderControllerIntegrationTest {
         OrderResponseDto actual = objectMapper.readValue(jsonResponse, OrderResponseDto.class);
         assertEquals(expected, actual);
     }
-
 }
