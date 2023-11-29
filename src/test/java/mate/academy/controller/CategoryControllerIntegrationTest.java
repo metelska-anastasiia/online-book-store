@@ -194,7 +194,7 @@ class CategoryControllerIntegrationTest {
     @WithMockUser(username = "user", password = "test", authorities = {"USER"})
     void getBookById_invalidId_shouldReturnException() throws Exception {
         mockMvc.perform(get("/api/categories/{id}", INVALID_ID))
-                .andExpect(status().isBadRequest()).andReturn();
+                .andExpect(status().isNotFound()).andReturn();
         assertThrows(EntityNotFoundException.class, () ->
                 categoryService.getById(INVALID_ID));
     }

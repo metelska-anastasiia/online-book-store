@@ -156,7 +156,7 @@ class ShoppingCartControllerIntegrationTest {
                         MockMvcRequestBuilders.get("/api/cart")
                                 .contentType(MediaType.APPLICATION_JSON)
                 )
-                .andExpect(MockMvcResultMatchers.status().isBadRequest())
+                .andExpect(MockMvcResultMatchers.status().isNotFound())
                 .andReturn();
     }
 

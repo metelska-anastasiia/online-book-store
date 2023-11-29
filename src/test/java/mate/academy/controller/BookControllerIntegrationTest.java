@@ -218,7 +218,7 @@ class BookControllerIntegrationTest {
     @WithMockUser(username = "user", password = "test", authorities = {"USER", "ADMIN"})
     void getBookById_invalidId_shouldReturnException() throws Exception {
         mockMvc.perform(get("/api/books/{id}", INVALID_ID))
-                .andExpect(status().isBadRequest()).andReturn();
+                .andExpect(status().isNotFound()).andReturn();
         assertThrows(EntityNotFoundException.class, () -> bookService.findById(
                 INVALID_ID));
     }

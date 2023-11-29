@@ -204,7 +204,10 @@ To set up and use the Online Book Store, follow these steps:
 2. Configure the database settings in the application properties.
 3. Build and run the application using your preferred Java IDE or build tool.
 4. Access the Swagger documentation: http://localhost:8080/swagger-ui.html
-   The API uses JWT (JSON Web Tokens) for authentication. To access protected endpoints, include the generated JWT token in the Authorization header of your requests.
+   The API uses JWT (JSON Web Tokens) for authentication. 
+
+   To access protected endpoints first login to api, then include the generated JWT token in the Authorization header of your requests.
+
 
 ## Challenges and Solutions
 **Challenge**: Implementing secure user authentication.
@@ -215,7 +218,7 @@ To set up and use the Online Book Store, follow these steps:
 
 **Solution**: Designed a ShoppingCartService and OrderService to handle cart operations and order management.
 
-## Postman Collection
+## Postman
 For detailed API usage, you can use provided requests samples.
 
 ## Conclusion
