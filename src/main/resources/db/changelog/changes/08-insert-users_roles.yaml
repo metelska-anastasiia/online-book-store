@@ -1,4 +1,8 @@
 databaseChangeLog:
+  - preConditions:
+      - dbms:
+        type: mysql
+        onFail: WARN
   - changeSet:
       id: insert-users_roles
       author: AnastasiiaMetelska

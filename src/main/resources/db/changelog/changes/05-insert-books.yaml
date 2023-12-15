@@ -1,4 +1,8 @@
 databaseChangeLog:
+  - preConditions:
+      - dbms:
+        type: mysql
+        onFail: WARN
   - changeSet:
       id: insert-books
       author: AnastasiiaMetelska

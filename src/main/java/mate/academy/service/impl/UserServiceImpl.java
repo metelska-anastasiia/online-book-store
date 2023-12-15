@@ -32,7 +32,7 @@ public class UserServiceImpl implements UserService {
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setEmail(request.getEmail());
         user.setRoles(Set.of(roleRepository.findByRoleName(Role.RoleName.USER)
-                .orElseThrow(() -> new EntityNotFoundException("Can't find role by role name"
+                .orElseThrow(() -> new EntityNotFoundException("Can't find role by role name "
                         + Role.RoleName.USER.name()))));
         user.setFirstName(request.getFirstName());
         user.setLastName(request.getLastName());
